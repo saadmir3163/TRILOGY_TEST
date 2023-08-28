@@ -40,6 +40,11 @@ export const appConfig: ApplicationConfig = {
           import('@realworld/settings/feature-settings').then((settings) => settings.SettingsComponent),
       },
       {
+        path: 'roaster',
+        loadComponent: () =>
+          import('@realworld/roaster/src/lib/roaster.component').then((roaster) => roaster.RoasterComponent),
+      },
+      {
         path: 'editor',
         loadChildren: () => import('@realworld/articles/article-edit').then((article) => article.ARTICLE_EDIT_ROUTES),
         canActivate: [authGuard],

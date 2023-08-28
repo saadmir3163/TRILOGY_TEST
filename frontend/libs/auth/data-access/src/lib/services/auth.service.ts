@@ -19,4 +19,8 @@ export class AuthService {
   register(credentials: NewUser): Observable<UserResponse> {
     return this.apiService.post<UserResponse, NewUserRequest>('/users', { user: credentials });
   }
+  // Inside AuthService
+  getAuthors(): Observable<UserResponse[]> {
+    return this.apiService.get<UserResponse[]>('/users');
+  }
 }
