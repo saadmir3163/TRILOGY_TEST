@@ -17,13 +17,21 @@ export const publishArticle$ = createEffect(
     return actions$.pipe(
       ofType(articleEditActions.publishArticle),
       concatLatestFrom(() => store.select(ngrxFormsQuery.selectData)),
-      concatMap(([_, data]) =>
-        articlesService.publishArticle(data).pipe(
+      concatMap(([_, data]) => {
+        // Convert the tagList string into an array of tags
+        const tagsArray = data.tagList.split(',').map((tag: string) => tag.trim());
+
+        const updatedData = { ...data, tagList: tagsArray };
+
+        return articlesService.publishArticle(updatedData).pipe(
           tap((result) => router.navigate(['article', result.article.slug])),
-          map(() => articleEditActions.publishArticleSuccess()),
+          map(() => {
+            console.log("hi there");
+            return articleEditActions.publishArticleSuccess()
+          }),
           catchError((result) => of(formsActions.setErrors({ errors: result.error.errors }))),
-        ),
-      ),
+        );
+      }),
     );
   },
   { functional: true },

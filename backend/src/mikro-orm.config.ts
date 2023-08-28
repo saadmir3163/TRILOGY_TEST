@@ -9,8 +9,8 @@ import { SeedManager } from '@mikro-orm/seeder';
 export default defineConfig({
   host: 'localhost',
   port: 3306,
-  user: 'conduit',
-  password: 'conduit',
+  user: 'admin',
+  password: '12345678',
   dbName: 'conduit',
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
