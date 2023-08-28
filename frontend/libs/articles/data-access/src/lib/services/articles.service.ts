@@ -1,13 +1,18 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 import { ApiService } from '@realworld/core/http-client';
+import { HomeService } from '../../../../../../libs/home/src/lib/home.service';
 import { Article, ArticleResponse, MultipleCommentsResponse, SingleCommentResponse } from '@realworld/core/api-types';
 import { ArticleListConfig } from '../+state/article-list/article-list.reducer';
 import { HttpParams } from '@angular/common/http';
+import { switchMap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class ArticlesService {
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private homeService: HomeService  // Inject the HomeService
+  ) {}
 
   getArticle(slug: string): Observable<ArticleResponse> {
     return this.apiService.get<ArticleResponse>('/articles/' + slug);
@@ -39,12 +44,19 @@ export class ArticlesService {
   }
 
   publishArticle(article: Article): Observable<ArticleResponse> {
-    if (article.slug) {
-      return this.apiService.put<ArticleResponse, ArticleResponse>('/articles/' + article.slug, {
-        article: article,
-      });
-    }
-    return this.apiService.post<ArticleResponse, ArticleResponse>('/articles/', { article: article });
+    // First, let's try to set all the tags in the article.
+    const setTagsObservables = article.tagList.map(tagName => this.homeService.setTag(tagName));
+
+    return forkJoin(setTagsObservables).pipe(
+      switchMap(() => {
+        if (article.slug) {
+          return this.apiService.put<ArticleResponse, ArticleResponse>('/articles/' + article.slug, {
+            article: article,
+          });
+        }
+        return this.apiService.post<ArticleResponse, ArticleResponse>('/articles/', { article: article });
+      })
+    );
   }
 
   // TODO: remove any
